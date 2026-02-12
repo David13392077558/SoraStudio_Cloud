@@ -8,7 +8,7 @@ type StatusResponse =
   | { success: true; task: TaskRecord }
   | { success: false; error: string };
 
-export function TaskStatusClient({ taskId }: { taskId: string }) {
+export default function TaskStatusClient({ taskId }: { taskId: string }) {
   const [task, setTask] = useState<TaskRecord | null>(null);
   const [error, setError] = useState<string | null>(null);
 
@@ -54,4 +54,3 @@ export function TaskStatusClient({ taskId }: { taskId: string }) {
 
   return <TaskStatusCard task={task} />;
 }
-

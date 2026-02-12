@@ -1,5 +1,6 @@
 import Link from "next/link";
-import { TaskStatusClient } from "@/app/components/TaskStatusClient";
+import TaskStatusClient from "@/app/components/TaskStatusClient";
+
 
 interface TaskPageProps {
   params: {
