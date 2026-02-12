@@ -1,7 +1,13 @@
 import Link from "next/link";
 import { TaskStatusClient } from "@/app/components/TaskStatusClient";
 
-export default function TaskPage({ params }) {
+interface TaskPageProps {
+  params: {
+    taskId: string;
+  };
+}
+
+export default function TaskPage({ params }: TaskPageProps) {
   const taskId = params.taskId;
 
   return (
