@@ -1,12 +1,8 @@
 import Link from "next/link";
 import { TaskStatusClient } from "@/app/components/TaskStatusClient";
 
-export default async function TaskPage({
-  params,
-}: {
-  params: { taskId: string };
-}) {
-  const { taskId } = params;
+export default function TaskPage({ params }: { params: { taskId: string } }) {
+  const taskId = params.taskId;
 
   return (
     <div className="space-y-6">
@@ -26,4 +22,3 @@ export default async function TaskPage({
     </div>
   );
 }
-
