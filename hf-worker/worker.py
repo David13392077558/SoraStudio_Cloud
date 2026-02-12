@@ -33,6 +33,10 @@ def upstash(command: str, *args: str) -> Any:
         raise RuntimeError(data["error"])
     return data.get("result")
 
+def set_heartbeat() -> None:
+    # milliseconds
+    upstash("set", "worker:heartbeat", str(int(time.time() * 1000)))
+
 
 def task_key(task_id: str) -> str:
     return f"task:{task_id}"
@@ -127,6 +131,8 @@ def run() -> None:
     print("🚀 HF Worker started. Polling Upstash queue: tasks:queue")
     while True:
         try:
+            # heartbeat on every loop
+            set_heartbeat()
             task_id = upstash("lpop", "tasks:queue")
             if not task_id:
                 time.sleep(1)

@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { pushTask, setTask, type TaskRecord } from "@/app/utils/redis";
+import { addToHistory, pushTask, setTask, type TaskRecord } from "@/app/utils/redis";
 
 export const runtime = "nodejs";
 
@@ -32,6 +32,7 @@ export async function POST(req: Request) {
     };
 
     await setTask(task);
+    await addToHistory(id);
     await pushTask(id);
 
     return NextResponse.json({ success: true, taskId: id, task });

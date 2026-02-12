@@ -56,6 +56,9 @@ export function taskKey(taskId: string) {
   return `task:${taskId}`;
 }
 
+const HISTORY_KEY = "tasks:history";
+const WORKER_HEARTBEAT_KEY = "worker:heartbeat";
+
 export async function pushTask(taskId: string) {
   // FIFO: producer RPUSH, worker LPOP
   await upstash<number>("rpush", "tasks:queue", taskId);
@@ -78,6 +81,34 @@ export async function getTask(taskId: string): Promise<TaskRecord | null> {
 export async function getStatus(taskId: string) {
   const task = await getTask(taskId);
   return task ? { status: task.status, progress: task.progress } : null;
+}
+
+export async function addToHistory(taskId: string, max = 50) {
+  // Newest first
+  await upstash<number>("lpush", HISTORY_KEY, taskId);
+  // Best-effort trim
+  await upstash<string>("ltrim", HISTORY_KEY, 0, Math.max(0, max - 1));
+}
+
+export async function listHistory(limit = 20): Promise<TaskRecord[]> {
+  const ids = (await upstash<Array<string | null>>("lrange", HISTORY_KEY, 0, Math.max(0, limit - 1))).filter(
+    (x): x is string => typeof x === "string" && x.length > 0
+  );
+
+  const tasks = await Promise.all(ids.map((id) => getTask(id)));
+  return tasks.filter((t): t is TaskRecord => !!t);
+}
+
+export async function getQueueDepth(): Promise<number> {
+  const n = await upstash<number>("llen", "tasks:queue");
+  return typeof n === "number" ? n : 0;
+}
+
+export async function getWorkerHeartbeatMs(): Promise<number | null> {
+  const raw = await upstash<string | null>("get", WORKER_HEARTBEAT_KEY);
+  if (!raw) return null;
+  const ms = Number(raw);
+  return Number.isFinite(ms) ? ms : null;
 }
 
 export async function setStatus(taskId: string, status: TaskStatus, progress?: number) {
